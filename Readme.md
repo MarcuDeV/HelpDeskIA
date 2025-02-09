@@ -7,7 +7,7 @@ A equipe de desenvolvimento deste projeto acadêmico é composta pelos seguintes
 - **Mairan**: Responsável pelo tratamento dos dados e análise de desempenho dos modelos.
 - **Marcus**: Focado na automação dos benchmarks, criação dos scripts para processamento de dados e testes com as IAs.
 - **Mateus**: Responsável pela validação das respostas geradas pelas IAs e pela avaliação da precisão das respostas com base nos testes realizados.
-- **Max**: Responsavel pela análise da interação dos modelos com os problemas de help-desk.
+- **Max**: Responsável pela análise da interação dos modelos com os problemas de help-desk.
 
 Este projeto visa criar uma solução automatizada para problemas comuns de help-desk, aproveitando tecnologias de IA de última geração para reduzir o tempo de resposta e melhorar a eficiência no suporte técnico.
 
@@ -40,15 +40,24 @@ A automação do processo de benchmark foi implementada no script `Automacao_Oll
 ### Estrutura do Projeto
 
 - **`Automacao_Ollama.py`**: Script principal responsável pela automação do benchmark.
+- **`Automacao_OllamaRAG.py`**: Script para automação de benchmarks usando o RAGFlow.
+- **`similiaridade.py`**: Script para calcular a similaridade entre respostas esperadas e fornecidas.
 - **`dataset.csv`**: Arquivo CSV contendo as perguntas e respostas esperadas para os testes.
+- **`dataset.json`**: Arquivo JSON contendo as perguntas e respostas esperadas para os testes.
 - **`resultados_llama3.1.csv`**: Arquivo CSV gerado com os resultados do modelo Llama 3.1.
 - **`resultados_qwen2.5.csv`**: Arquivo CSV gerado com os resultados do modelo Qwen 2.5.
+- **`respostasJarvis.csv`**: Arquivo CSV gerado com as respostas do assistente Jarvis.
+- **`respostasSiri.csv`**: Arquivo CSV gerado com as respostas do assistente Siri.
+- **`relatorio_similaridade.csv`**: Arquivo CSV gerado com o relatório de similaridade entre as respostas dos assistentes.
 
 ### Dependências
 
 - Python 3.6+
 - `sentence-transformers`
 - `subprocess`
+- `dotenv`
+- `ragflow_sdk`
+- `numpy`
 
 ### Passo a Passo
 
@@ -69,31 +78,80 @@ A automação do processo de benchmark foi implementada no script `Automacao_Oll
     pip install -r requirements.txt
     ```
 
-4. **Rodar o Script de Benchmark**:
+4. **Configurar Variáveis de Ambiente**:
+    Crie um arquivo [.env]na raiz do projeto e adicione as seguintes variáveis:
+    ```
+    RAGFLOW_API_KEY=your_api_key
+    RAGFLOW_BASE_URL=your_base_url
+    ```
+
+5. **Rodar o Script de Benchmark**:
     ```bash
     python Automacao_Ollama.py
     ```
 
-5. **Analisar os Resultados**:
-    - Os resultados serão salvos nos arquivos `resultados_llama3.1.csv` e `resultados_qwen2.5.csv`.
+6. **Rodar o Script de Benchmark com RAGFlow**:
+    ```bash
+    python Automacao_OllamaRAG.py
+    ```
+
+7. **Calcular Similaridade**:
+    ```bash
+    python similiaridade.py
+    ```
+
+8. **Analisar os Resultados**:
+    - Os resultados serão salvos nos arquivos `resultados_llama3.1.csv`, `resultados_qwen2.5.csv`, `respostasJarvis.csv`, `respostasSiri.csv` e `relatorio_similaridade.csv`.
 
 ### Funções Principais
 
-#### [carregar_perguntas(arquivo_csv)]
+#### carregar_perguntas(arquivo_csv)
 
 Carrega as perguntas e respostas esperadas do arquivo CSV para os testes.
 
-#### [enviar_para_ollama_terminal(pergunta, modelo)]
+#### enviar_para_ollama_terminal(pergunta, modelo)
 
 Envia uma pergunta ao modelo via terminal e retorna a resposta gerada.
 
-#### [calcular_similaridade_semantica(resposta_modelo, resposta_esperada)]
+#### calcular_similaridade_semantica(resposta_modelo, resposta_esperada)
 
 Calcula a similaridade semântica entre as respostas geradas e as esperadas usando o modelo de embeddings `sentence-transformers`.
 
-#### [processar_perguntas(arquivo_csv, arquivo_saida, modelo)]
+#### processar_perguntas(arquivo_csv, arquivo_saida, modelo)
 
 Processa as perguntas, compara as respostas e salva os resultados em um arquivo CSV.
+
+#### calcular_similaridade(resposta_esperada, resposta_fornecida)
+
+Calcula a similaridade entre duas respostas usando embeddings.
+
+#### gerar_relatorio(respostas_jarvis, respostas_siri)
+
+Gera um relatório de similaridade entre as respostas dos assistentes Jarvis e Siri.
+
+#### ler_respostas_csv()
+
+Lê as respostas dos assistentes dos arquivos CSV.
+
+#### main()
+
+Função principal para executar o cálculo de similaridade e gerar o relatório.
+
+#### RAGFlow
+
+Classe para interagir com a API do RAGFlow.
+
+#### list_chats()
+
+Lista os assistentes disponíveis na API do RAGFlow.
+
+#### create_session()
+
+Cria uma sessão para um assistente específico.
+
+#### ask(pergunta, stream=True)
+
+Envia uma pergunta ao assistente e retorna a resposta gerada.
 
 ### Resultados dos Testes
 
@@ -142,3 +200,53 @@ Aqui estão os resultados de uma amostra das perguntas realizadas com o modelo Q
 Embora ambos os modelos apresentem taxas de acerto satisfatórias e tenham sido capazes de gerar respostas precisas na maioria das perguntas, ainda há espaço para melhorias significativas. O modelo **Llama 3.1**, por exemplo, apresentou uma tendência de fornecer respostas mais longas do que o necessário, o que pode afetar a clareza e a eficiência das respostas, especialmente em questões simples. Por outro lado, o modelo **Qwen 2.5** demonstrou problemas como troca inesperada de idiomas e falhas no uso de ícones, o que afetou a consistência das respostas.
 
 Esses pontos negativos ainda precisam ser abordados para garantir uma maior precisão e eficiência nas respostas, especialmente em um contexto de suporte técnico onde a clareza e a precisão são fundamentais para o bom atendimento ao usuário. Com melhorias nesses aspectos, ambos os modelos têm potencial para fornecer respostas ainda mais eficazes e confiáveis.
+
+### Resultados dos Testes com RAG
+
+A seguir, apresentamos os resultados de uma amostra de perguntas realizadas com os modelos Llama 3.1 (Jarvis) e Qwen 2.5 (Siri) utilizando a técnica RAG:
+
+#### Resultados do Modelo Llama 3.1 (Jarvis) com RAG
+
+| Pergunta | Similaridade |
+|----------|---------------|
+| O que devo fazer se fiz alguma alteração recente no meu computador? | 0.75 |
+| Como posso melhorar a segurança do meu Wi-Fi? | 0.78 |
+| Quais são os passos para configurar uma VPN? | 0.80 |
+| Como posso recuperar arquivos deletados do meu computador? | 0.82 |
+| O que devo fazer se meu computador estiver lento? | 0.83 |
+| Como posso proteger meu computador contra vírus? | 0.84 |
+| Quais são as melhores práticas para criar senhas seguras? | 0.85 |
+| Como posso configurar um backup automático dos meus arquivos? | 0.86 |
+| O que devo fazer se meu computador não ligar? | 0.87 |
+| Como posso limpar meu computador para liberar espaço? | 0.88 |
+
+**Taxa de Acerto do Modelo Llama 3.1 (Jarvis) com RAG**: 82.8%
+
+#### Resultados do Modelo Qwen 2.5 (Siri) com RAG
+
+| Pergunta | Similaridade |
+|----------|---------------|
+| Como posso melhorar a segurança do meu Wi-Fi? | 0.78 |
+| O que devo fazer se meu computador estiver lento? | 0.80 |
+| Como posso proteger meus dados pessoais online? | 0.82 |
+| Quais são as melhores práticas para criar senhas seguras? | 0.83 |
+| Como posso evitar phishing e fraudes online? | 0.84 |
+| O que devo fazer se meu computador não ligar? | 0.85 |
+| Como posso configurar uma rede doméstica segura? | 0.86 |
+| Quais são os sinais de que meu computador pode estar infectado por malware? | 0.87 |
+| Como posso fazer backup dos meus dados? | 0.88 |
+| O que devo fazer se meu computador estiver superaquecendo? | 0.89 |
+
+**Taxa de Acerto do Modelo Qwen 2.5 (Siri) com RAG**: 86.8%
+
+### Conclusão
+
+A implementação da técnica RAG demonstrou uma melhoria significativa na precisão e relevância das respostas geradas pelos modelos de IA. A combinação da geração de texto com a recuperação de informações permitiu que os modelos fornecessem respostas mais precisas e úteis, aumentando a eficácia do chatbot de suporte técnico.
+
+### Pontos a Melhorar
+
+Apesar dos resultados promissores, ainda há espaço para melhorias, tais como:
+
+- **Expansão da base de dados**: Adicionar mais informações técnicas à base de dados para aumentar a cobertura de possíveis perguntas.
+- **Otimização do processo de recuperação**: Melhorar os algoritmos de recuperação de informações para obter resultados ainda mais relevantes.
+- **Avaliação contínua**: Realizar avaliações contínuas para monitorar a performance dos modelos e ajustar conforme necessário.
